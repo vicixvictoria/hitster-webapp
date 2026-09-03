@@ -23,6 +23,7 @@ export default function PlayPage() {
   const [status, setStatus] = useState<Status>('idle');
   const [error, setError] = useState<string | null>(null);
   const [trackInfo, setTrackInfo] = useState<TrackInfo | null>(null);
+  const [otherDevices, setOtherDevices] = useState<string[]>([]);
 
   // Immer nur dieses Handy als Wiedergabegerät – nie einen anderen
   // Spotify-Lautsprecher (Echo Dot o.ä.).
@@ -36,6 +37,7 @@ export default function PlayPage() {
         const phone = phones.find((d) => d.is_active) ?? phones[0];
 
         if (!phone) {
+          setOtherDevices(devices.map((d) => `${d.name} (${d.type})`));
           setStatus('no-phone');
           return;
         }
@@ -95,7 +97,16 @@ export default function PlayPage() {
       {status === 'no-phone' && (
         <div className="card">
           <p>Dieses Handy ist noch nicht als Spotify-Gerät aktiv.</p>
-          <p className="hint">{OPEN_SPOTIFY_HINT}</p>
+          <ol className="steps">
+            <li>Spotify-App auf diesem Handy öffnen.</li>
+            <li>Unten auf das <strong>Geräte-Symbol</strong> tippen (Lautsprecher-Icon).</li>
+            <li><strong>„Dieses iPhone"</strong> auswählen – nicht den Echo Dot.</li>
+            <li>Kurz einen Song abspielen, dann pausieren.</li>
+            <li>Hierher zurück und „Nochmal versuchen".</li>
+          </ol>
+          {otherDevices.length > 0 && (
+            <p className="hint">Gefunden hat Spotify nur: {otherDevices.join(', ')}.</p>
+          )}
           <button onClick={() => start(trackId)}>Nochmal versuchen</button>
         </div>
       )}
