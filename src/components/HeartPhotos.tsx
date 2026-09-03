@@ -5,50 +5,41 @@ import photo3 from '../assets/IundE2026.2.jpg';
 import photo4 from '../assets/IundE_2015.jpg';
 import photo5 from '../assets/IundE_2016.jpg';
 
+// Heart path normalised to a 0..1 bounding box so it can clip any <img> size.
 const HEART_PATH =
-  'M12,21.35 L10.55,20.03 C5.4,15.36 2,12.28 2,8.5 C2,5.42 4.42,3 7.5,3 ' +
-  'C9.24,3 10.91,3.81 12,5.09 C13.09,3.81 14.76,3 16.5,3 C19.58,3 22,5.42 22,8.5 ' +
-  'C22,12.28 18.6,15.36 13.45,20.04 Z';
+  'M0.5,0.889 L0.44,0.835 C0.225,0.657 0.083,0.512 0.083,0.354 ' +
+  'C0.083,0.226 0.184,0.125 0.313,0.125 C0.385,0.125 0.455,0.159 0.5,0.212 ' +
+  'C0.545,0.159 0.615,0.125 0.688,0.125 C0.816,0.125 0.917,0.226 0.917,0.354 ' +
+  'C0.917,0.512 0.775,0.657 0.56,0.835 Z';
 
 interface Heart {
   src: string;
+  objectPosition: string;
   style: CSSProperties;
-  align?: string;
 }
 
 const hearts: Heart[] = [
-  { src: photo1, style: { top: '4%', left: '4%', width: 'min(20vw, 130px)', transform: 'rotate(-9deg)' } },
-  { src: photo2, style: { top: '6%', right: '4%', width: 'min(20vw, 130px)', transform: 'rotate(7deg)' } },
-  { src: photo3, style: { top: '46%', left: '2%', width: 'min(17vw, 110px)', transform: 'rotate(-6deg)' } },
-  { src: photo4, style: { top: '58%', right: '3%', width: 'min(20vw, 130px)', transform: 'rotate(5deg)' } },
-  {
-    src: photo5,
-    style: { top: '80%', left: '10%', width: 'min(18vw, 115px)', transform: 'rotate(-4deg)' },
-    align: 'xMidYMin slice',
-  },
+  { src: photo1, objectPosition: 'center', style: { top: '4%', left: '4%', width: 'min(20vw, 130px)', transform: 'rotate(-9deg)' } },
+  { src: photo2, objectPosition: 'center', style: { top: '6%', right: '4%', width: 'min(20vw, 130px)', transform: 'rotate(7deg)' } },
+  { src: photo3, objectPosition: 'center', style: { top: '46%', left: '2%', width: 'min(17vw, 110px)', transform: 'rotate(-6deg)' } },
+  { src: photo4, objectPosition: 'center', style: { top: '58%', right: '3%', width: 'min(20vw, 130px)', transform: 'rotate(5deg)' } },
+  { src: photo5, objectPosition: 'center top', style: { top: '80%', left: '10%', width: 'min(18vw, 115px)', transform: 'rotate(-4deg)' } },
 ];
 
 export default function HeartPhotos() {
   return (
     <div className="heart-photos" aria-hidden="true">
+      {/* Shared heart clip path, referenced by CSS clip-path on each <img>. */}
+      <svg className="heart-clip-def" width="0" height="0">
+        <defs>
+          <clipPath id="heart-clip" clipPathUnits="objectBoundingBox">
+            <path d={HEART_PATH} />
+          </clipPath>
+        </defs>
+      </svg>
       {hearts.map((heart, i) => (
         <div className="heart-photo" style={heart.style} key={i}>
-          <svg viewBox="0 0 24 24" width="100%" height="100%">
-            <defs>
-              <clipPath id={`heart-clip-${i}`}>
-                <path d={HEART_PATH} />
-              </clipPath>
-            </defs>
-            <image
-              href={heart.src}
-              x="0"
-              y="0"
-              width="24"
-              height="24"
-              preserveAspectRatio={heart.align ?? 'xMidYMid slice'}
-              clipPath={`url(#heart-clip-${i})`}
-            />
-          </svg>
+          <img src={heart.src} alt="" loading="lazy" style={{ objectPosition: heart.objectPosition }} />
         </div>
       ))}
     </div>
