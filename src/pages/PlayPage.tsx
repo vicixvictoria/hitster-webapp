@@ -5,19 +5,22 @@ import { getDevices, getTrackInfo, playTrackAt, type SpotifyDevice, type TrackIn
 import { formatSeconds } from '../lib/songUtils';
 import { lookupSong } from '../lib/songDb';
 
-const LS_DEVICE = 'spotify_device_id';
+// v2: alter Schlüssel absichtlich fallengelassen, damit alle wieder mit
+// "Handy zuerst" starten (früher wurde teils der Echo Dot übernommen).
+const LS_DEVICE = 'spotify_device_id_v2';
 
 type Status = 'idle' | 'loading-devices' | 'playing' | 'need-device' | 'error';
 
 // Welches Spotify-Gerät ohne Nachfrage benutzt wird:
-// 1. das gerade aktive, 2. das zuletzt benutzte, 3. das Handy,
+// 1. das zuletzt bewusst gewählte, 2. das Handy (spielt über seinen
+// Lautsprecher bzw. eine gekoppelte Bluetooth-Box), 3. das aktive Gerät,
 // 4. wenn es nur ein Gerät gibt, eben dieses.
 function pickDevice(list: SpotifyDevice[]): SpotifyDevice | undefined {
   const stored = localStorage.getItem(LS_DEVICE);
   return (
-    list.find((d) => d.is_active) ??
     (stored ? list.find((d) => d.id === stored) : undefined) ??
     list.find((d) => d.type === 'Smartphone') ??
+    list.find((d) => d.is_active) ??
     (list.length === 1 ? list[0] : undefined)
   );
 }
@@ -36,6 +39,7 @@ export default function PlayPage() {
   const [status, setStatus] = useState<Status>('idle');
   const [error, setError] = useState<string | null>(null);
   const [trackInfo, setTrackInfo] = useState<TrackInfo | null>(null);
+  const [playingDeviceId, setPlayingDeviceId] = useState<string | null>(null);
 
   const playOn = useCallback(
     async (deviceId: string, currentTrackId: string) => {
@@ -44,6 +48,7 @@ export default function PlayPage() {
       try {
         await playTrackAt(deviceId, currentTrackId, startSeconds * 1000);
         localStorage.setItem(LS_DEVICE, deviceId);
+        setPlayingDeviceId(deviceId);
         setStatus('playing');
         getTrackInfo(currentTrackId).then(setTrackInfo).catch(() => {});
       } catch (e) {
@@ -154,6 +159,13 @@ export default function PlayPage() {
           <p className="song-artist">{trackInfo?.artists ?? dbEntry?.artist}</p>
           <p className="song-time">ab {formatSeconds(startSeconds)}</p>
           {noDbEntry && <p className="hint">Kein Zeitpunkt hinterlegt – Song startet von vorne.</p>}
+          <p className="hint">
+            Läuft auf: {devices.find((d) => d.id === playingDeviceId)?.name ?? 'Standardgerät'}
+            {' · '}
+            <button type="button" className="link-button" onClick={() => start(trackId, true)}>
+              Gerät wechseln
+            </button>
+          </p>
         </div>
       )}
 
