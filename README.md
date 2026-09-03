@@ -16,14 +16,16 @@ Auf dem Handy, das die Musik abspielen soll:
 1. Die Adresse der App im Browser öffnen.
 2. **Passwort** eingeben.
 3. **„Mit Spotify anmelden"** – einmalig mit dem Premium-Account einloggen.
-4. Die **Spotify-App kurz öffnen** (irgendein Song reicht), damit das Handy als Wiedergabegerät erkannt wird. Dann zurück in den Browser.
+4. Die **Spotify-App auf diesem Handy kurz öffnen** (irgendeinen Song antippen, dann pausieren), damit das Handy als Wiedergabegerät aktiv ist. Dann zurück in den Browser.
 5. **„Scanner starten"** tippen und die Karte vor die Kamera halten – der Song startet automatisch am richtigen Punkt.
 6. Für die nächste Runde **„Nächste Karte scannen"**.
 
+Der Ton kommt **immer aus diesem Handy** – also über den Handylautsprecher oder eine damit gekoppelte Bluetooth-Box. Andere Spotify-Geräte (Echo, Sonos …) werden bewusst ignoriert. Die Bluetooth-Box also am Handy koppeln, nicht in Spotify auswählen.
+
 ### Wenn nichts abspielt
 
-- Meldung „Kein Spotify-Gerät gefunden": Spotify-App öffnen, kurz etwas abspielen, dann in der Webapp unten das Gerät neu auswählen.
-- Das abspielende Handy muss online bleiben und darf Spotify nicht komplett schließen.
+- Meldung „Dieses Handy ist noch nicht als Spotify-Gerät aktiv": Spotify-App öffnen, kurz einen Song antippen und wieder pausieren, dann „Nochmal versuchen".
+- Das abspielende Handy muss online bleiben und darf die Spotify-App nicht komplett schließen.
 - Wird eine Karte gescannt, für die keine Startzeit hinterlegt ist, startet der Song von Anfang an.
 
 ## Songs & Startzeiten verwalten
