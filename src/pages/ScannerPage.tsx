@@ -1,5 +1,4 @@
 import { useEffect, useRef, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { Html5Qrcode } from 'html5-qrcode';
 import { isLoggedIn, startLogin } from '../lib/spotifyAuth';
 import { parseSpotifyTrackId } from '../lib/songUtils';
@@ -8,7 +7,6 @@ import HeartPhotos from '../components/HeartPhotos';
 const READER_ID = 'qr-reader';
 
 export default function ScannerPage() {
-  const navigate = useNavigate();
   const [loggedIn] = useState(isLoggedIn());
   const [scanning, setScanning] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -54,9 +52,12 @@ export default function ScannerPage() {
     const trackId = parseSpotifyTrackId(decodedText);
     if (!trackId) {
       setError('Dieser QR-Code enthält keinen gültigen Spotify-Link.');
+      handledRef.current = false;
       return;
     }
-    navigate(`/p?t=${trackId}`);
+    // Voller Seitenwechsel statt SPA-Navigation: iOS Safari lässt sonst nach
+    // dem Schließen der Kamera manchmal eine weiße Seite stehen.
+    window.location.assign(`/p?t=${trackId}`);
   }
 
   if (!loggedIn) {
