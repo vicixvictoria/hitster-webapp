@@ -1,9 +1,9 @@
 import type { CSSProperties } from 'react';
 import photo1 from '../assets/IundE2021.jpg';
-import photo2 from '../assets/IundE2026.JPG';
-import photo3 from '../assets/IundE2026.2.JPG';
-import photo4 from '../assets/IundE_2015.JPG';
-import photo5 from '../assets/IundE_2016.JPG';
+import photo2 from '../assets/IundE2026.jpg';
+import photo3 from '../assets/IundE2026.2.jpg';
+import photo4 from '../assets/IundE_2015.jpg';
+import photo5 from '../assets/IundE_2016.jpg';
 
 const HEART_PATH =
   'M12,21.35 L10.55,20.03 C5.4,15.36 2,12.28 2,8.5 C2,5.42 4.42,3 7.5,3 ' +
