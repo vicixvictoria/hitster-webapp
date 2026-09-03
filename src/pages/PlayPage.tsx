@@ -7,8 +7,17 @@ import { lookupSong } from '../lib/songDb';
 
 type Status = 'idle' | 'loading' | 'playing' | 'no-phone' | 'error';
 
+// Zuletzt benutztes Handy-Gerät – als Rückfall, wenn Spotify das Handy
+// nach einer Pause kurz nicht mehr in der Geräteliste führt.
+const LS_PHONE = 'hitster_phone_device_id';
+
 const OPEN_SPOTIFY_HINT =
-  'Öffne kurz die Spotify-App auf diesem Handy (irgendeinen Song antippen und wieder pausieren), dann zurück und erneut scannen.';
+  'Öffne kurz die Spotify-App auf diesem Handy (irgendeinen Song antippen und wieder pausieren), dann zurück und „Nochmal versuchen".';
+
+const NO_PAUSE_HINT =
+  'Tipp: Zwischen den Karten nicht in Spotify pausieren – einfach die nächste Karte scannen, dann wechselt der Song von selbst.';
+
+const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
 export default function PlayPage() {
   const [params] = useSearchParams();
@@ -31,18 +40,44 @@ export default function PlayPage() {
       setStatus('loading');
       setError(null);
       try {
-        const devices = await getDevices();
-        const phones = devices.filter((d) => d.type === 'Smartphone');
-        const phone = phones.find((d) => d.is_active) ?? phones[0];
+        const findPhone = async () => {
+          const devices = await getDevices();
+          const phones = devices.filter((d) => d.type === 'Smartphone');
+          return phones.find((d) => d.is_active) ?? phones[0];
+        };
 
+        // Nach einer Pause taucht das Handy manchmal erst nach 1–2 s
+        // wieder in der Geräteliste auf – deshalb ein zweiter Versuch.
+        let phone = await findPhone();
         if (!phone) {
-          setStatus('no-phone');
+          await sleep(1500);
+          phone = await findPhone();
+        }
+
+        const playOn = async (deviceId: string) => {
+          await playTrackAt(deviceId, currentTrackId, startSeconds * 1000);
+          localStorage.setItem(LS_PHONE, deviceId);
+          setStatus('playing');
+          getTrackInfo(currentTrackId).then(setTrackInfo).catch(() => {});
+        };
+
+        if (phone) {
+          await playOn(phone.id);
           return;
         }
 
-        await playTrackAt(phone.id, currentTrackId, startSeconds * 1000);
-        setStatus('playing');
-        getTrackInfo(currentTrackId).then(setTrackInfo).catch(() => {});
+        // Letzter Versuch: direkt auf das zuletzt benutzte Handy-Gerät.
+        const stored = localStorage.getItem(LS_PHONE);
+        if (stored) {
+          try {
+            await playOn(stored);
+            return;
+          } catch {
+            /* Gerät wirklich weg – unten Hinweis zeigen */
+          }
+        }
+
+        setStatus('no-phone');
       } catch (e) {
         const msg = (e as Error).message;
         if (msg === 'NOT_LOGGED_IN') {
@@ -94,8 +129,9 @@ export default function PlayPage() {
 
       {status === 'no-phone' && (
         <div className="card">
-          <p>Dieses Handy ist noch nicht als Spotify-Gerät aktiv.</p>
+          <p>Dieses Handy ist gerade nicht als Spotify-Gerät aktiv.</p>
           <p className="hint">{OPEN_SPOTIFY_HINT}</p>
+          <p className="hint">{NO_PAUSE_HINT}</p>
           <button onClick={() => start(trackId)}>Nochmal versuchen</button>
         </div>
       )}
