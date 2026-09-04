@@ -32,6 +32,7 @@ export default function PlayPage() {
   const [status, setStatus] = useState<Status>('idle');
   const [error, setError] = useState<string | null>(null);
   const [trackInfo, setTrackInfo] = useState<TrackInfo | null>(null);
+  const [revealed, setRevealed] = useState(false);
 
   // Immer nur dieses Handy als Wiedergabegerät – nie einen anderen
   // Spotify-Lautsprecher (Echo Dot o.ä.).
@@ -94,6 +95,9 @@ export default function PlayPage() {
 
   useEffect(() => {
     if (!loggedIn || !trackId) return;
+    // Neue Karte: Song erst nach Antippen verraten.
+    setRevealed(false);
+    setTrackInfo(null);
     void start(trackId);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [loggedIn, trackId]);
@@ -136,7 +140,15 @@ export default function PlayPage() {
         </div>
       )}
 
-      {status === 'playing' && (
+      {status === 'playing' && !revealed && (
+        <div className="card reveal-card">
+          <p className="reveal-emoji">🎵</p>
+          <p>Der Song läuft! Ratet gemeinsam Jahr, Titel und Interpret.</p>
+          <button onClick={() => setRevealed(true)}>Song auflösen</button>
+        </div>
+      )}
+
+      {status === 'playing' && revealed && (
         <div className="now-playing">
           {trackInfo?.image && <img src={trackInfo.image} alt="" className="album-art" />}
           <p className="song-title">{trackInfo?.name ?? dbEntry?.title ?? '…'}</p>

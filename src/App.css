@@ -101,6 +101,17 @@
   background: var(--accent-2);
 }
 
+.reveal-card {
+  max-width: 340px;
+  align-items: center;
+  text-align: center;
+}
+
+.reveal-emoji {
+  font-size: 40px;
+  margin: 0;
+}
+
 .now-playing {
   background: var(--card-bg);
   border: 1px solid var(--border);
